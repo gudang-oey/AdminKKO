@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keanggotaan Koperasi_OEY</title>
+    <!-- Site Icons -->
+    <link rel="shortcut icon" href="images/logo.png" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.bootstrap5.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      body {
+        padding-top: 56px;
+      }
+      .navbar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 1030;
+      }
+      .header-actions {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 10px;
+        z-index: 1020;
+        border-bottom: 1px solid #dee2e6;
+      }
+      /* Navbar Styling */
+      .navbar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 1030;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-nav {
+        margin-left: auto; /* Memindahkan nav items ke kanan */
+      }
+
+      .navbar-toggler {
+        margin-left: auto; /* Memindahkan hamburger menu ke kanan pada mobile */
+      }
+
+      .logo {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+      }
+
+      .navbar-nav .nav-link {
+        padding: 0.5rem 1rem;
+        transition: color 0.2s;
+      }
+
+      .navbar-nav .nav-link:hover {
+        color: var(--info-color) !important;
+      }
+
+      /* Dropdown Styling */
+      .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .dropdown-item {
+        padding: 0.5rem 1.5rem;
+        transition: background-color 0.2s;
+      }
+
+      /* Main Content */
+      .main-content {
+        padding: 20px;
+      }
+
+      /* Card Styling */
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .table-container {
+        margin-top: 110px;
+        overflow-x: auto;
+      }
+      #loadingIndicator {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2000;
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      #errorMessage {
+        display: none;
+        margin: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#"> Data Keanggotaan 2025 </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="admin.html">
+                <i class="fas fa-home"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="#"
+                data-bs-toggle="modal"
+                data-bs-target="#aboutModal"
+              >
+                <i class="fas fa-info-circle"></i> Info
+              </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                <i class="fas fa-list"></i> Data Keanggotaan
+              </a>
+              <ul class="dropdown-menu year-menu">
+                <!-- Will be populated dynamically -->
+              </ul>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+          <button id="downloadBtn" class="btn btn-success">
+            <i class="fas fa-download"></i> Download Excel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loadingIndicator" style="display: none">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span class="ms-2">Memuat data...</span>
+    </div>
+
+    <div id="errorMessage"></div>
+
+    <div class="table-container">
+      <div class="container-fluid">
+        <div class="table-responsive">
+          <table id="dataTable" class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>NIK</th>
+                <th>Nama Karyawan</th>
+                <th>No WA</th>
+                <th>Divisi</th>
+                <th>Jabatan</th>
+                <th>Jenis Kelamin</th>
+                <th>Status</th>
+                <th>Januari</th>
+                <th>Februari</th>
+                <th>Maret</th>
+                <th>April</th>
+                <th>Mei</th>
+                <th>Juni</th>
+                <th>Juli</th>
+                <th>Agustus</th>
+                <th>September</th>
+                <th>Oktober</th>
+                <th>November</th>
+                <th>Desember</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Modal About -->
+    <div
+      class="modal fade"
+      id="aboutModal"
+      tabindex="-1"
+      aria-labelledby="aboutModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="aboutModalLabel">
+              <i class="fas fa-info-circle me-2"></i>Pusat Informasi
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title text-primary mb-4">
+                  <i class="fas fa-chart-line me-2"></i>Tentang Dashboard
+                </h5>
+                <p class="card-text lead">
+                  Halaman ini adalah pusat informasi bagi admin yang dirancang
+                  untuk menampilkan rekap umum dari data secara keseluruhan.
+                </p>
+                <p class="card-text">
+                  Dengan tampilan dashboard yang sederhana namun informatif,
+                  admin dapat dengan mudah memantau ringkasan penting tanpa
+                  perlu melakukan perubahan langsung pada data (CRUD).
+                </p>
+                <p class="card-text">
+                  Sebagai tambahan, beberapa data yang tersedia dapat diunduh
+                  dalam format Excel untuk memudahkan analisis dan pelaporan
+                  lebih lanjut.
+                </p>
+                <hr class="my-4" />
+                <div class="text-center">
+                  <p class="text-muted mb-4">
+                    Jika membutuhkan informasi lebih, silakan hubungi admin.
+                  </p>
+                  <a
+                    href="https://wa.me/6282279265112"
+                    target="_blank"
+                    class="btn btn-success btn-lg"
+                  >
+                    <i class="fab fa-whatsapp me-2"></i>Hubungi via WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+      // Ganti dengan URL Google Apps Script Anda
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycby6Hgba9WE8rG566H6Ws9VsUV5HW1WWjPxRo1c2UpwKAKBjupyFKbs9sIpJwM3jm5sH/exec";
+      let dataTable;
+      let globalData = [];
+
+      // Available years
+      const availableYears = [2025, 2026, 2027, 2028, 2029, 2030];
+
+      function showLoading() {
+        document.getElementById("loadingIndicator").style.display = "block";
+      }
+
+      function hideLoading() {
+        document.getElementById("loadingIndicator").style.display = "none";
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+      }
+
+      function hideError() {
+        document.getElementById("errorMessage").style.display = "none";
+      }
+
+      function formatRupiah(number) {
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(number);
+      }
+
+      function initializeDataTable(data) {
+        if (dataTable) {
+          dataTable.destroy();
+        }
+
+        dataTable = $("#dataTable").DataTable({
+          data: data,
+          scrollX: true,
+          scrollCollapse: true,
+          autoWidth: false,
+          pageLength: 25,
+          fixedHeader: {
+            header: true,
+            headerOffset:
+              $(".header-actions").outerHeight() + $(".navbar").outerHeight(),
+          },
+          columns: [
+            { data: "NO" },
+            { data: "NIK" },
+            { data: "NAMA_KARYAWAN" },
+            { data: "NO_WA" },
+            { data: "DIVISI" },
+            { data: "JABATAN" },
+            { data: "JENIS_KELAMIN" },
+            { data: "STATUS" },
+            {
+              data: "JANUARI",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "FEBRUARI",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "MARET",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "APRIL",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "MEI",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "JUNI",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "JULI",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "AGUSTUS",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "SEPTEMBER",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "OKTOBER",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "NOVEMBER",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+            {
+              data: "DESEMBER",
+              render: (data) => formatRupiah(data),
+              className: "text-end",
+            },
+          ],
+          columnDefs: [
+            {
+              targets: "_all",
+              className: "text-nowrap",
+            },
+          ],
+        });
+      }
+
+      async function fetchData() {
+        showLoading();
+        hideError();
+
+        try {
+          const year =
+            new URLSearchParams(window.location.search).get("year") || "2025";
+          console.log("Fetching data for year:", year);
+
+          const response = await fetch(`${API_URL}?year=${year}`);
+          console.log("Response status:", response.status);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log("Data received:", result);
+
+          if (result.error) {
+            throw new Error(result.error);
+          }
+
+          globalData = result.data || [];
+          initializeDataTable(globalData);
+          document.title = `Data Karyawan ${year} - Koperasi OEY`;
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          showError(`Error loading data: ${error.message}`);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Download functionality
+      document
+        .getElementById("downloadBtn")
+        .addEventListener("click", function () {
+          if (globalData.length === 0) {
+            alert("No data available to download");
+            return;
+          }
+          const year =
+            new URLSearchParams(window.location.search).get("year") || "2025";
+          const ws = XLSX.utils.json_to_sheet(globalData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Data Karyawan");
+          XLSX.writeFile(wb, `Data_Karyawan_${year}.xlsx`);
+        });
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        // Populate year dropdown
+        const yearMenu = document.querySelector(".year-menu");
+        availableYears.forEach((year) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<a class="dropdown-item" href="?year=${year}">${year}</a>`;
+          yearMenu.appendChild(li);
+        });
+
+        // Fetch initial data
+        fetchData();
+      });
+    </script>
+  </body>
+</html>
